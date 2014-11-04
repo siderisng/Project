@@ -1,0 +1,196 @@
+#include <stdio.h>
+#include <string.h>
+#include <pthread.h>
+#include <errno.h>
+#include <stdlib.h>
+
+#define StringSize 100
+#define Capacity 5
+
+void EnterCar(char *CarDir);
+void ExitCar (char *CarDir);
+
+void * Car(void* carDir);
+
+char currDir;
+pthread_mutex_t mtxleft,mtxright, mtxentr, mtxexit,mtxfull;
+int countl, countr;
+int carsPassed, carsleft;
+
+
+int main (int argc, char *argv[]){
+ 	char directions[StringSize];
+	int i,thrCheck;
+	pthread_t *p_thrd;
+	
+	currDir= 'l';
+	countl=0, countr=0;
+	carsPassed= Capacity;
+	carsleft=0;
+	printf ("Please type the directions of the cars. l for left r for right:");
+	scanf ("%s", directions);
+	printf ("\n");
+	
+	for (i=0; i< strlen(directions); i++){
+		if (directions[i]=='r'){
+			countr++;
+		}
+		else{
+			countl++;
+		}
+	}
+	
+	if (pthread_mutex_init(&mtxfull, NULL) != 0)
+    {
+        perror ("Mutex error");
+        return 1;
+    }
+	pthread_mutex_lock(&mtxfull);
+	
+	if (pthread_mutex_init(&mtxentr, NULL) != 0)
+    {
+        perror ("Mutex error");
+        return 1;
+    }
+	
+	if (pthread_mutex_init(&mtxexit, NULL) != 0)
+    {
+        perror ("Mutex error");
+        return 1;
+    }
+	
+	if (pthread_mutex_init(&mtxleft, NULL) != 0)
+    {
+        perror ("Mutex error");
+        return 1;
+    }
+    pthread_mutex_lock (&mtxleft);
+	
+	
+	 if (pthread_mutex_init(&mtxright, NULL) != 0)
+    {
+        perror ("Mutex error");
+        return 1;
+    }
+    pthread_mutex_lock (&mtxright);
+	
+	
+	if (NULL==(p_thrd= (pthread_t*)malloc(strlen(directions)*sizeof(pthread_t)))){
+		perror ("Memory allocation error");
+	}
+		
+	for (i=0; i< strlen(directions); i++){
+		thrCheck = pthread_create( &p_thrd[i], NULL, Car , (void *)(&directions[i]));
+		if(thrCheck){
+			fprintf(stderr,"Error - pthread_create() return code: %d\n",thrCheck);
+			exit(EXIT_FAILURE);
+		}
+	}
+			while (1);
+	return 0;
+}
+
+
+void EnterCar(char *CarDir){
+	
+	pthread_mutex_lock (&mtxentr);
+	if (carsPassed==0){
+		pthread_mutex_lock (&mtxentr);
+		//printf ("1\n");
+		//pthread_mutex_lock(&mtxfull);
+		
+		
+	}
+	if ((*CarDir!= currDir)&&(*CarDir=='l'))/*||((carsPassed==0)&&(*CarDir=='l')))*/{
+		pthread_mutex_unlock (&mtxentr);
+		//printf ("2\n");
+		pthread_mutex_lock (&mtxleft);
+		
+		if ((currDir=='l')&&(carsPassed!=1)){
+		pthread_mutex_lock (&mtxentr);
+		pthread_mutex_unlock (&mtxleft);
+	}
+	
+	else if ((*CarDir!= currDir)&&(*CarDir=='r'))/*||((carsPassed==0)&&(*CarDir=='r')))*/{
+		pthread_mutex_unlock (&mtxentr);
+		//printf ("3\n");
+		pthread_mutex_lock (&mtxright);
+		
+		if ((currDir=='r')&&(carsPassed!=1)){
+		pthread_mutex_lock (&mtxentr);
+		pthread_mutex_unlock (&mtxright);
+	}
+	
+	}
+	
+	
+	
+	
+	printf ("%c car passed\n",*CarDir);
+
+	
+	carsPassed--;
+	pthread_mutex_unlock (&mtxentr);
+	
+	
+	
+}
+
+void ExitCar(char *CarDir){
+	
+	pthread_mutex_lock (&mtxexit);
+	
+	printf ("%c car leaving bridge\n", *CarDir);
+	carsleft++;
+	if (*CarDir=='l'){
+		countl--;
+	}else {
+		countr--;
+	}
+	if (countl==0){
+		carsPassed= Capacity;
+		pthread_mutex_unlock(&mtxright);
+		printf ("HIII\n");
+	}
+	if (countr==0){
+		carsPassed= Capacity;
+		pthread_mutex_unlock(&mtxleft);
+		printf ("HIII\n");
+		
+	}
+	if (carsPassed==(carsleft-Capacity)){
+		carsPassed= Capacity;
+		carsleft=0;
+		if (currDir=='l'){
+			currDir='r';
+			pthread_mutex_unlock(&mtxright);
+			
+			
+		}
+		else if (currDir=='r'){
+			currDir='l';
+			pthread_mutex_unlock(&mtxleft);
+			
+		}
+		
+		pthread_mutex_unlock (&mtxentr);
+	}
+	pthread_mutex_unlock (&mtxexit);
+
+}
+
+
+
+void * Car(void* carDir){
+	
+	char * CarDir;
+	
+	CarDir= (char*)(carDir);
+	
+	EnterCar (CarDir);
+	
+	ExitCar (CarDir);
+	
+	
+	return (carDir);
+}
