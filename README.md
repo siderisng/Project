@@ -1,4 +1,0 @@
-Project
-=======
-
-Starting up
