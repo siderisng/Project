@@ -141,6 +141,7 @@ void ExitCar(char *CarDir){
 		
 		carsleft=0;
 		carsPassed= Capacity;
+		printf("ADEIASMA\n");
 		
 		
 		
@@ -153,6 +154,7 @@ void ExitCar(char *CarDir){
 		
 		carsleft=0;
 		carsPassed= Capacity;
+		printf("ADEIASMA\n");
 		
 		
 		
@@ -167,12 +169,16 @@ void ExitCar(char *CarDir){
 		if (carsleft==Capacity){
 			carsleft=0;
 			carsPassed= Capacity;
+			
+			if ((currDir=='r')){
+				pthread_mutex_unlock(&rightDir);
+			}else if(carsleft!=Capacity){
+				pthread_mutex_unlock(&leftDir);
+			}
+			printf("ADEIASMA\n");
 		}
-		if ((carsleft!=Capacity)&&(currDir=='r')){
-			pthread_mutex_unlock(&rightDir);
-		}else if((currDir=='l')&&(carsleft!=Capacity)){
-			pthread_mutex_unlock(&leftDir);
-		}
+		
+
 		
 		
 	}
