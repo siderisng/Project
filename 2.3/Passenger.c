@@ -132,7 +132,7 @@ void TrainReturn(){
 		}
 		printf ("Waiting for Passengers\n");}	
 		else {		
-			printf ("Nothing else to do let's go drinking\n");
+			printf ("Nothing else to do let's go home\n");
 			pthread_mutex_unlock (&end); //termatismos programmatos
 			
 		}
@@ -141,6 +141,13 @@ void TrainReturn(){
 void *Passenger(){
 	
 	pthread_mutex_lock (&entry);		//blokarisma twn epivatwn mexri na vevaiwthoume oti xwrane
+	
+	if ((timesToRun==0)&&(passLeft!=0)){ //an einai to teleytaio treno den perimenei na gemisei
+			capacity=passLeft;		
+			pthread_mutex_unlock (&entry);	
+		}
+	
+	
 	noBoard++;				//posoi einai sto treno
 	
 	
@@ -182,12 +189,9 @@ void *Passenger(){
 		pthread_mutex_unlock (&entry);	
 		timesToRun--;
 		
-		if ((timesToRun==0)&&(passLeft!=0)){ //an einai to teleytaio treno den perimenei na gemisei
-			capacity=passLeft;		
-			pthread_mutex_unlock (&entry);	
-		}
-		else if ((timesToRun==0)&&(passLeft==0)){
-			printf ("Nothing else to do let's go drinking\n");
+		
+		if ((timesToRun==0)&&(passLeft==0)){
+			printf ("Nothing else to do let's go home\n");
 			pthread_mutex_unlock(&end); //termatismos
 		}else{
 			pthread_mutex_unlock (&entry);	

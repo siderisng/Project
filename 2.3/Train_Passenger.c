@@ -113,8 +113,9 @@ void * Train(){
 	
 	while (1){
 		
-		pthread_mutex_lock (&ride);
+		pthread_mutex_lock (&ride);   //otan ine etimo ksekina  ti diadromi
 		
+		//ektipwni ta katallila minimata
 		printf ("YOOOOOHOOOOOOO Starting RIDE!!!!!\n");
 		printf ("With %d Passengers!!!!!\n", capacity);
 		for (i=0; i<3; i++){
@@ -126,13 +127,14 @@ void * Train(){
 		printf ("End of the ride :(\n");
 		timesToRun--;
 		
+		//an ine to telefteo treno termatizei
 		if(flag==1){		
 			printf ("Nothing else to do... I'm Going Home\n");
 			pthread_mutex_unlock (&end); //termatismos programmatos
 			break;
 		}
 		
-		else if (flag!=1){		//epistrofi trenou
+		else if (flag!=1){		//alliws epistrofi trenou
 			printf ("Returning back\n");
 		
 			for (i=0;i<3; i++){
@@ -144,7 +146,7 @@ void * Train(){
 			pthread_mutex_unlock (&entry);	
 		
 		}
-		
+		//an ostoso den exoun mini epivates termatizei
 		if ((timesToRun==0)&&(passLeft==0)){
 			printf ("Nothing else to do... I'm Going Home\n");
 			pthread_mutex_unlock (&end); //termatismos programmatos
@@ -166,14 +168,14 @@ void *Passenger(){
 			flag=1;
 	}
 	
-	noBoard++;				//posoi einai sto treno
+	noBoard++;				//posoi perimenoun na boun sto treno
 	
 	
 	
 	if (noBoard!=capacity){			
 		pthread_mutex_unlock (&entry);	//an den einai gemato bainei kai allos
 	}else {
-		pthread_mutex_unlock(&board);	//alliws fevgei to treno
+		pthread_mutex_unlock(&board);	
 	}
 	
 	pthread_mutex_lock(&board);		//kleidwma mexri na bei o teleytaios epivatis kathe trenou
@@ -181,15 +183,17 @@ void *Passenger(){
 	
 	noBoard--;	
 	
-	if (noBoard!=0){
-		pthread_mutex_unlock (&board);	//ksekleidwma gia na ksekinisei to epomeno treno
-	}
-	
-	
 	if (noBoard==0){
 		
-		pthread_mutex_unlock (&ride);	 
+		pthread_mutex_unlock (&ride);	 // an bi ke o telefteos ksekleidwma gia na ksekinisei to treno
 	}
+	
+	if (noBoard!=0){
+		pthread_mutex_unlock (&board);	// afinoume na epibibastoun oloi oi epivates
+	}
+	
+	
+	
 	
 	
 	
